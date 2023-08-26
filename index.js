@@ -30,6 +30,7 @@ async function run() {
     const menuCollection = client.db("starship").collection("menu");
     const reviewsCollection = client.db("starship").collection("reviews");
     const cartCollection = client.db("starship").collection("carts");
+    const usersCollection = client.db("starship").collection("users");
 
     app.get('/menu', async(req,res)=>{
         const result = await menuCollection.find().toArray();
@@ -41,6 +42,12 @@ async function run() {
         res.send(result);
     })
 
+    app.post('/users', async(req,res)=>{
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
+
     // cart collection
     app.post('/carts',async(req,res)=>{
         const item = req.body;
@@ -48,6 +55,7 @@ async function run() {
         const result = await cartCollection.insertOne(item);
         res.send(result);
     })
+
     app.get('/carts',async(req,res)=>{
         const email = req.query.email;
         if(!email){
