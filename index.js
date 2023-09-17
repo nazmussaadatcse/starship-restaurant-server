@@ -60,11 +60,21 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users', async (req, res) => {
+    const verifyAdmin = async(req,res,next)=>{
+      const email = req.decoded.email;
+      const query = {email:email}
+      const user = await usersCollection.findOne(query);
+      if(user?.role !== 'admin'){
+        return res.status(403).send({error: true, message: ' forbidden access' });
+      }
+      next();
+    }
+
+    app.get('/users',verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     })
-    
+
     // make admin 
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
