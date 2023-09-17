@@ -64,7 +64,8 @@ async function run() {
       const result = await usersCollection.find().toArray();
       res.send(result);
     })
-
+    
+    // make admin 
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -75,6 +76,20 @@ async function run() {
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
+    })
+
+    // verify admin user 
+    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({ admin: false });
+      }
+      query = { email: email }
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === 'admin' }
+      res.send(result);
+
     })
 
     app.post('/jwt', (req, res) => {
@@ -114,13 +129,13 @@ async function run() {
       }
 
       const decodedEmail = req.decoded.email;
-      if(email != decodedEmail){
+      if (email != decodedEmail) {
         return res.status(403).send({ error: true, message: ' forbidden access' });
       }
-  
-        const query = { email: email };
-        const result = await cartCollection.find(query).toArray();
-        res.send(result);
+
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
     })
 
     app.delete('/carts/:id', async (req, res) => {
