@@ -43,7 +43,11 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    
+    // remove await to fix a server error 
+
+    // await client.connect();
+    client.connect();
 
     const menuCollection = client.db("starship").collection("menu");
     const reviewsCollection = client.db("starship").collection("reviews");
@@ -60,17 +64,17 @@ async function run() {
       res.send(result);
     })
 
-    const verifyAdmin = async(req,res,next)=>{
+    const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
-      const query = {email:email}
+      const query = { email: email }
       const user = await usersCollection.findOne(query);
-      if(user?.role !== 'admin'){
-        return res.status(403).send({error: true, message: ' forbidden access' });
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: ' forbidden access' });
       }
       next();
     }
 
-    app.get('/users',verifyJWT, verifyAdmin, async (req, res) => {
+    app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     })
