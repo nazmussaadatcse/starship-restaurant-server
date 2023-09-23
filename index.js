@@ -43,7 +43,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    
+
     // remove await to fix a server error 
 
     // await client.connect();
@@ -54,16 +54,7 @@ async function run() {
     const cartCollection = client.db("starship").collection("carts");
     const usersCollection = client.db("starship").collection("users");
 
-    app.get('/menu', async (req, res) => {
-      const result = await menuCollection.find().toArray();
-      res.send(result);
-    })
-
-    app.get('/reviews', async (req, res) => {
-      const result = await reviewsCollection.find().toArray();
-      res.send(result);
-    })
-
+    // verify Admin func
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
       const query = { email: email }
@@ -74,6 +65,25 @@ async function run() {
       next();
     }
 
+    // menu api 
+    app.get('/menu', async (req, res) => {
+      const result = await menuCollection.find().toArray();
+      res.send(result);
+    })
+    // add new menu item
+    app.post('/menu', verifyJWT, verifyAdmin, async (req, res) => {
+      const newItem = req.body;
+      const result = await menuCollection.insertOne(newItem);
+      res.send(result);
+    })
+
+    app.get('/reviews', async (req, res) => {
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    })
+
+
+    // get users 
     app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
@@ -131,7 +141,6 @@ async function run() {
     // cart collection
     app.post('/carts', async (req, res) => {
       const item = req.body;
-      // console.log(item);
       const result = await cartCollection.insertOne(item);
       res.send(result);
     })
