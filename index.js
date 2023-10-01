@@ -178,27 +178,22 @@ async function run() {
     })
 
     // stripe payment api
-    app.post("/create-payment-intent", async (req, res) => {
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
       const { price } = req.body;
       const amount = price * 100;
+      console.log(price, amount);
 
       // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
-        currency: "usd",
-        payment_method_types: [
-          "card"
-        ],
-        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-        automatic_payment_methods: {
-          enabled: true,
-        },
+        currency: 'usd',
+        payment_method_types: ['card']
       });
 
       res.send({
-        clientSecret: paymentIntent.client_secret,
-      });
-    });
+        clientSecret: paymentIntent.client_secret
+      })
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
