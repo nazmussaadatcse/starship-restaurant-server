@@ -54,6 +54,7 @@ async function run() {
     const reviewsCollection = client.db("starship").collection("reviews");
     const cartCollection = client.db("starship").collection("carts");
     const usersCollection = client.db("starship").collection("users");
+    const paymentCollection = client.db("starship").collection("payments");
 
     // verify Admin func
     const verifyAdmin = async (req, res, next) => {
@@ -193,6 +194,13 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret
       })
+    })
+
+    // payment api 
+    app.post('/payments', verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment)
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
